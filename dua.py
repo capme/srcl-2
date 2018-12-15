@@ -14,9 +14,10 @@ class Cart:
         self.conn.commit()
 
     def tambahProduk(self, kodeProduk, kuantitas):
-        sql = "INSERT INTO cart(kode_produk, qty) values ('{}', {}) ON CONFLICT(kode_produk) DO UPDATE SET qty=qty+{}".format(kodeProduk, kuantitas, kuantitas)
-        print(sql)
-        self.c.execute(sql)
+        # sql = "INSERT INTO cart(kode_produk, qty) values (?, ?) ON CONFLICT(kode_produk) DO UPDATE SET qty=qty+?"
+        sql = "INSERT OR REPLACE INTO cart(kode_produk, qty) VALUES " \
+              "(?, ?+coalesce((SELECT ifnull(qty, 0) FROM cart WHERE kode_produk=?),0))"
+        self.c.execute(sql, [kodeProduk, kuantitas, kodeProduk])
         self.conn.commit()
 
     def hapusSemuaProduk(self):
@@ -46,11 +47,10 @@ class Cart:
         self.conn.close()
 
 
-obj = Cart()
-obj.tambahProduk('KODE1', 2)
-obj.tambahProduk('KODE1', 2)
-obj.tampilkanCart()
-obj.close()
+# obj = Cart()
+# obj.tambahProduk('KODE1', 2)
+# obj.tampilkanCart()
+# obj.close()
 # obj.hapusProduk('KODE1')
 # obj.tambahProduk('KODE2', 3)
 
